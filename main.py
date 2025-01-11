@@ -3,17 +3,9 @@ import pytz
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from get_data import create_google_event
+from function_time import change_time_peru, transform_format_twelve_str
 
 json_content_anime = []
-# follow_animes = [
-#     "dragon ball daima",
-#     "Solo Leveling 2nd Season: Arise from the Shadow",
-#     "Shangri-La Frontier: Kusoge Hunter, Kamige ni Idoman to su 2nd Season",
-#     "Pokémon Horizons: The Series",
-#     "Guild no Uketsukejou desu ga, Zangyou wa Iya nanode Boss wo Solo Tobatsu Shiyou to Omoimasu",
-#     "One Piece",
-#     "Dr. Stone: Science Future",
-# ]
 
 
 def read_file_animes():
@@ -56,7 +48,7 @@ def scrap_web_json():
         soup = BeautifulSoup(response.content, "html.parser")
         day_now = date_now_day()
         schedule_section = soup.find_all(
-            "div", class_=f"timetable-column expanded odd {day_now}"
+            "div", class_=f"timetable-column expanded even {day_now}"
         )
         if schedule_section:
             for anime in schedule_section:
@@ -77,22 +69,24 @@ def scrap_web_json():
                         "span", class_="show-episode"
                     ).text.strip()
 
-                    change_time = change_utc_time(anime_hour)
-                    current_time = datetime.now()
-
-                    time_change_time = datetime.strptime(
-                        change_time, "%Y-%m-%d %I:%M %p"
-                    )
+                    change_time = change_time_peru(anime_hour)
+                    current_time = datetime.now(pytz.timezone("America/Lima"))
 
                     result = (
                         current_time + timedelta(minutes=10)
-                        if time_change_time < current_time
-                        else time_change_time
+                        if change_time < current_time
+                        else change_time
                     )
 
                     create_collection(
-                        anime_name, change_utc_time(anime_hour), anime_cap
+                        anime_name, transform_format_twelve_str(result), anime_cap
                     )
+                    # print(anime_name)
+                    # print("hout scrap", anime_hour)
+                    # print("hour transform", change_time)
+                    # print("actual hour", current_time)
+                    # print("new_ hour", result)
+                    # print("\n")
                     # print(result.strftime("%Y-%m-%d %I:%M %p"))
     else:
         print(f"Error al acceder a la pagina: {response.status_code}")
@@ -108,5 +102,5 @@ def temp_follow_anime():
 
 
 temp_follow_anime()
-print(json_content_anime)
+# print(json_content_anime)
 # scrap_web_json()
