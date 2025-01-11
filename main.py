@@ -5,15 +5,24 @@ from datetime import datetime, timedelta
 from get_data import create_google_event
 
 json_content_anime = []
-follow_animes = [
-    "dragon ball daima",
-    "Solo Leveling 2nd Season: Arise from the Shadow",
-    "Shangri-La Frontier: Kusoge Hunter, Kamige ni Idoman to su 2nd Season",
-    "Pokémon Horizons: The Series",
-    "Guild no Uketsukejou desu ga, Zangyou wa Iya nanode Boss wo Solo Tobatsu Shiyou to Omoimasu",
-    "One Piece",
-    "Dr. Stone: Science Future",
-]
+# follow_animes = [
+#     "dragon ball daima",
+#     "Solo Leveling 2nd Season: Arise from the Shadow",
+#     "Shangri-La Frontier: Kusoge Hunter, Kamige ni Idoman to su 2nd Season",
+#     "Pokémon Horizons: The Series",
+#     "Guild no Uketsukejou desu ga, Zangyou wa Iya nanode Boss wo Solo Tobatsu Shiyou to Omoimasu",
+#     "One Piece",
+#     "Dr. Stone: Science Future",
+# ]
+
+
+def read_file_animes():
+    with open("./list_animes.txt", "r", encoding="utf-8") as file:
+        anime_list = [line.strip() for line in file]
+    return anime_list
+
+
+follow_animes = read_file_animes()
 
 
 def change_utc_time(utc_time_str):
