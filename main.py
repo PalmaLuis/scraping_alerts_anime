@@ -29,9 +29,13 @@ def change_utc_time(utc_time_str):
 
 
 def date_now_day():
+    days_week_even = ["Tuesday", "Thursday", "Saturday"]
     hoy = datetime.now()
     week_day = hoy.strftime("%A")
-    return week_day
+    if week_day in days_week_even:
+        return f"even {week_day}"
+    else:
+        return f"odd {week_day}"
 
 
 def create_collection(anime_name, anime_local_hour, anime_cap):
@@ -48,7 +52,7 @@ def scrap_web_json():
         soup = BeautifulSoup(response.content, "html.parser")
         day_now = date_now_day()
         schedule_section = soup.find_all(
-            "div", class_=f"timetable-column expanded even {day_now}"
+            "div", class_=f"timetable-column expanded {day_now}"
         )
         if schedule_section:
             for anime in schedule_section:
@@ -81,13 +85,6 @@ def scrap_web_json():
                     create_collection(
                         anime_name, transform_format_twelve_str(result), anime_cap
                     )
-                    # print(anime_name)
-                    # print("hout scrap", anime_hour)
-                    # print("hour transform", change_time)
-                    # print("actual hour", current_time)
-                    # print("new_ hour", result)
-                    # print("\n")
-                    # print(result.strftime("%Y-%m-%d %I:%M %p"))
     else:
         print(f"Error al acceder a la pagina: {response.status_code}")
 
@@ -102,5 +99,5 @@ def temp_follow_anime():
 
 
 temp_follow_anime()
-# print(json_content_anime)
+print(json_content_anime)
 # scrap_web_json()
