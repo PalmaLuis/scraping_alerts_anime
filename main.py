@@ -1,5 +1,6 @@
 import requests
 import pytz
+import json
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from get_data import create_google_event
@@ -43,6 +44,32 @@ def create_collection(anime_name, anime_local_hour, anime_cap):
     json_content_anime.append(template)
 
 
+def aired_unaired(anime, opt_cap):
+    anime_card = anime.find_all(
+        "div", class_=f"timetable-column-show {opt_cap} expanded"
+    )
+    for anime_sub_card in anime_card:
+        anime_name = anime_sub_card.find("h2", class_="show-title-bar").text.strip()
+        anime_hour = (
+            anime_sub_card.find("time", class_="show-air-time").get("datetime").strip()
+        )
+        anime_cap = anime_sub_card.find("span", class_="show-episode").text.strip()
+        change_time = change_time_peru(anime_hour)
+        current_time = datetime.now(pytz.timezone("America/Lima"))
+        result = (
+            current_time + timedelta(minutes=10)
+            if change_time < current_time
+            else change_time
+        )
+        create_collection(anime_name, transform_format_twelve_str(result), anime_cap)
+
+
+def save_as_json():
+    file_path = "./animes_hoy.json"
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(json_content_anime, file, indent=4, ensure_ascii=False)
+
+
 def scrap_web_json():
     url = "https://animeschedule.net/"
 
@@ -56,35 +83,9 @@ def scrap_web_json():
         )
         if schedule_section:
             for anime in schedule_section:
-                anime_card = anime.find_all(
-                    "div", class_="timetable-column-show aired expanded"
-                )
-                for anime_sub_card in anime_card:
-                    anime_name = anime_sub_card.find(
-                        "h2",
-                        class_="show-title-bar",
-                    ).text.strip()
-                    anime_hour = (
-                        anime_sub_card.find("time", class_="show-air-time")
-                        .get("datetime")
-                        .strip()
-                    )
-                    anime_cap = anime_sub_card.find(
-                        "span", class_="show-episode"
-                    ).text.strip()
-
-                    change_time = change_time_peru(anime_hour)
-                    current_time = datetime.now(pytz.timezone("America/Lima"))
-
-                    result = (
-                        current_time + timedelta(minutes=10)
-                        if change_time < current_time
-                        else change_time
-                    )
-
-                    create_collection(
-                        anime_name, transform_format_twelve_str(result), anime_cap
-                    )
+                aired_unaired(anime, "aired")
+                aired_unaired(anime, "unaired")
+        save_as_json()
     else:
         print(f"Error al acceder a la pagina: {response.status_code}")
 
@@ -99,5 +100,5 @@ def temp_follow_anime():
 
 
 temp_follow_anime()
-print(json_content_anime)
+# print(json_content_anime)
 # scrap_web_json()
