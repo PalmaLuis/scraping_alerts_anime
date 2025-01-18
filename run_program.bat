@@ -4,6 +4,5 @@ cd /d D:\projects\anilist
 
 call venv\Scripts\activate
 
-python main.py
-
+python main.py >> logs.txt 2>&1
 deactivate
